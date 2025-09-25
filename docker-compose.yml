@@ -1,0 +1,36 @@
+# docker-compose.yml
+version: '3.8'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ProductApi/Dockerfile
+    container_name: product_api
+    restart: unless-stopped
+    ports:
+      - "5001:5001"        # host:container
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://api:5001/api/products"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  frontend:
+    build:
+      context: .
+      dockerfile: product-frontend/Dockerfile
+    container_name: product_frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      # SSR: server-side fetching uses API_URL (internal Docker hostname)
+      - API_URL=http://api:5001
+      # client-side browser fetches must use a host reachable from browser -> map to host's port
+      - NEXT_PUBLIC_API_URL=http://localhost:5001
