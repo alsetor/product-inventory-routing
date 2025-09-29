@@ -8,7 +8,7 @@ WORKDIR /src/ProductApi
 RUN dotnet restore
 
 # copy everything else and build
-COPY ProductApi/. ./ProductApi/
+COPY ProductApi/. ./
 WORKDIR /src/ProductApi
 RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 
