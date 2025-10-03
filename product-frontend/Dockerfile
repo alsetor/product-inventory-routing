@@ -4,15 +4,15 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 # copy package files and install deps
-COPY product-frontend/package*.json ./ 
-# If you use yarn: COPY product-frontend/yarn.lock ./
+COPY package*.json ./ 
 RUN npm ci
 
 # copy the rest of the app
-COPY product-frontend/ ./
+COPY . ./
 
 # build the Next app
 ENV NODE_ENV=production
+ENV NEXT_PUBLIC_API_URL=http://localhost:30045
 RUN npm run build
 
 # Production image
@@ -22,7 +22,7 @@ WORKDIR /app
 # copy minimal runtime files
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY product-frontend/package*.json ./
+COPY package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 
 ENV NODE_ENV=production
