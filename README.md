@@ -19,19 +19,19 @@ The scheme illustrates how requests flow through the system in both **Redirect**
 
 ### Redirect Mode
 
-1. **Web Client → YARP Gateway**  
+1. **Web Client → YARP Gateway**
    Request: `/products/id.aspx`
 
-2. **YARP Gateway → Web Client**  
+2. **YARP Gateway → Web Client**
    Response: `301 Redirect → /products/id`
 
-3. **Web Client → YARP Gateway**  
+3. **Web Client → YARP Gateway**
    Request: `/products/id`
 
-4. **YARP Gateway → Next.js Server**  
+4. **YARP Gateway → Next.js Server**
    Request: `/products/id`
 
-5. **Next.js Server → ASP.NET Core API**  
+5. **Next.js Server → ASP.NET Core API**
    Request: `/api/products/id`
 
 > Best for SEO preservation and gradual migration from legacy URLs.
@@ -40,13 +40,13 @@ The scheme illustrates how requests flow through the system in both **Redirect**
 
 ### Proxy Mode
 
-1. **Web Client → YARP Gateway**  
+1. **Web Client → YARP Gateway**
    Request: `/products/id.aspx`
 
-2. **YARP Gateway → Next.js Server**  
+2. **YARP Gateway → Next.js Server**
    Internally rewritten to: `/products/id`
 
-3. **Next.js Server → ASP.NET Core API**  
+3. **Next.js Server → ASP.NET Core API**
    Request: `/api/products/id`
 
 > Seamless user experience with no visible redirects. Ideal for full proxying and legacy URL masking.
@@ -58,7 +58,7 @@ The scheme illustrates how requests flow through the system in both **Redirect**
 ### Backend (ASP.NET Core 9)
 - RESTful API for product management
 - In-memory storage (no external DB required)
-- Docker-ready for easy deployment
+- Kubernetes deployment with containerized services
 
 ### Frontend (Next.js + React)
 - Server-side rendering (SSR) for SEO and performance
@@ -81,7 +81,7 @@ The scheme illustrates how requests flow through the system in both **Redirect**
 | Backend      | ASP.NET Core 9, Entity Framework Core |
 | Frontend     | Next.js, React                 |
 | Gateway      | YARP (Reverse Proxy)           |
-| Containerization | Docker, Docker Compose     |
+| Containerization | Kubernetes     |
 
 ---
 
@@ -122,19 +122,47 @@ The scheme illustrates how requests flow through the system in both **Redirect**
 
 ---
 
-### Docker Deployment
+### Kubernetes Deployment
 
-Run all services (API, frontend, gateway) with one command:
+All services — API, frontend, and gateway — are deployed as separate pods and services in a Kubernetes cluster.
 
-```bash
-docker-compose up --build
-```
+#### Prerequisites
 
-Access the app via:
+- Docker Desktop with Kubernetes enabled
+- `kubectl` CLI installed and configured
+- Local Docker images built with `imagePullPolicy: Never`
+- Kubernetes manifests located in the `k8s/` directory
 
-- **Gateway**: `http://localhost:7045`
-- **Frontend**: `http://localhost:3000`
-- **API**: `http://localhost:5001`
+#### Steps
+
+1. **Build Docker images locally**:
+
+   ```bash
+   docker build --no-cache -t product-api ./ProductApi
+   docker build --no-cache -t product-frontend ./product-frontend
+   docker build --no-cache -t product-gateway ./ProductGateway
+   ```
+
+2. **Apply Kubernetes manifests**:
+
+   ```bash
+   kubectl apply -f k8s/
+   ```
+
+3. **Restart deployments to use fresh images**:
+
+   ```bash
+   kubectl rollout restart deployment product-api
+   kubectl rollout restart deployment product-frontend
+   kubectl rollout restart deployment product-gateway
+   ```
+
+4. **Access the app via the gateway**:
+
+   - **Gateway**: `http://localhost:30045` (NodePort)
+   - **Frontend & API**: Internal-only via Kubernetes DNS
+
+> The gateway proxies requests to the frontend and backend using internal service names (`product-frontend`, `product-api`). Only the gateway is exposed externally.
 
 ---
 
@@ -144,16 +172,17 @@ Access the app via:
 ├── ProductApi/           # ASP.NET Core backend
 ├── product-frontend/     # Next.js frontend
 ├── ProductGateway/       # YARP reverse proxy
-├── docker-compose.yml    # Multi-service orchestration
+├── k8s/                  # Kubernetes manifests
 ```
 
 ---
 
-## 🧠 Notes
+## Notes
 
 - Legacy `.aspx` URLs are supported via YARP middleware
 - SSR ensures SEO-friendly product pages
 - Configurable routing logic via "RoutingOptions" in appsettings.json
+- Kubernetes services use `ClusterIP` for internal routing and `NodePort` for gateway exposure
 
 ---
 
