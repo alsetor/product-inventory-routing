@@ -1,4 +1,5 @@
 "use client";
+
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from 'antd';
@@ -9,7 +10,7 @@ export default function ProductDetailsClient({ product }: { product: Product }) 
   const router = useRouter();
   const handleDelete = async () => {
     await api.delete(`/products/${product.id}`);
-    router.push('/products');
+    router.push('/');
   };
   return (
     <div style={{ maxWidth: 600 }}>
@@ -20,7 +21,7 @@ export default function ProductDetailsClient({ product }: { product: Product }) 
       <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
         <Link href={`/products/${product.id}/edit`}><Button>Edit</Button></Link>
         <Button danger onClick={handleDelete}>Delete</Button>
-        <Link href="/products"><Button>Back</Button></Link>
+        <Link href="/"><Button>Back</Button></Link>
       </div>
     </div>
   );

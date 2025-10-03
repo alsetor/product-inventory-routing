@@ -11,7 +11,7 @@ export default function AntdLayout({ children }: { children: React.ReactNode }) 
       <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ color: 'white', fontWeight: 700 }}>Product Inventory</div>
         <nav>
-          <Link href="/products" style={{ color: 'white', marginRight: 12 }}>Products</Link>
+          <Link href="/" style={{ color: 'white', marginRight: 12 }}>Products</Link>
           <Link href="/products/new" style={{ color: 'white' }}>Add product</Link>
         </nav>
       </Header>

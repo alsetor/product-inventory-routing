@@ -23,7 +23,7 @@ export default function ProductForm({ initial, mode }: Props) {
         await api.put(`/products/${initial?.id}`, values);
         message.success('Product updated');
       }
-      router.push('/products');
+      router.push('/');
     } catch (err) {
       message.error('Operation failed' + (err instanceof Error ? `: ${err.message}` : ''));
     }
