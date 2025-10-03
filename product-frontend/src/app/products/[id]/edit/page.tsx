@@ -1,23 +1,24 @@
-"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
 import { Product } from '../../../../../types/product';
 import api from '../../../../../lib/api';
 import ProductForm from '../../../../../components/ProductForm';
 
-export default function EditProductPage() {
-  const [product, setProduct] = useState<Product | null>(null);
-  const router = useRouter();
-  const params = useParams();
-  const id = params?.id;
+async function getProduct(id: string): Promise<Product | null> {
+  try {
+    const res = await api.get(`/products/${id}`);
+    return res.data;
+  } catch {
+    return null;
+  }
+}
 
-  useEffect(() => {
-    api.get(`/products/${id}`).then(res => setProduct(res.data)).catch(() => router.push('/products'));
-  }, [id]);
+interface Props {
+  params: { id: string };
+}
 
-  if (!product) return <div>Loading...</div>;
-
+export default async function EditProductPage({ params }: Props) {
+  const product = await getProduct(params.id);
+  if (!product) return <div>Product not found</div>;
   return (
     <div style={{ maxWidth: 600 }}>
       <h1>Edit Product</h1>
